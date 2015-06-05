@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const INTERVAL_PERIOD time.Duration = 1 * time.Hour
+const INTERVAL_PERIOD time.Duration = 3 * time.Hour
 
 //const INTERVAL_PERIOD time.Duration = 30 * time.Second
 var repository *RemoteJobRepository
