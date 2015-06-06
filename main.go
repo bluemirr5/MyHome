@@ -18,7 +18,7 @@ func main() {
 	scheduler.Runner = func() {
 		parser.TotalGet()
 	}
-	scheduler.MinTick = 44
+	scheduler.MinTick = 0
 	scheduler.SecTick = 0
 	scheduler.NsecTick = 0
 	scheduler.Run()
@@ -27,6 +27,13 @@ func main() {
 	repository.Open()
 	defer repository.Close()
 	http.HandleFunc("/getRemoteJobInfo", getRemoteJobInfo)
+	http.HandleFunc("/batchNow", func(w http.ResponseWriter, r *http.Request) {
+		parser.TotalGet()
+		apiResult := new(APIResult)
+		apiResult.ResultCode = 200
+		returnVal, _ := json.Marshal(apiResult)
+		w.Write(returnVal)
+	})
 	http.Handle("/views/", http.StripPrefix("/views/", http.FileServer(http.Dir("./views/"))))
 	http.ListenAndServe(":4001", nil)
 }
