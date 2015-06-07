@@ -1,0 +1,27 @@
+<div>
+    <div class="starter-template">
+        <h1>Remote Job List</h1>
+        <p class="lead">Remote Job List</p>
+        <ul class="list-unstyled">
+            <li><button ng-click="startBatch()">Start Batch</button></li>
+        </ul>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th class="text-center">회사</th>
+                <th class="text-center">업데이트 일</th>
+                <th class="text-center">등록일</th>
+                <th class="text-center">링크</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="job in list">
+                <td ng-bind="job.Company"></td>
+                <td ng-bind="job.UpdateDate"></td>
+                <td ng-bind="job.Timestamp.substring(0, 16)"></td>
+                <td><a href="{{job.Url}}" target="_blank">[Link]</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
