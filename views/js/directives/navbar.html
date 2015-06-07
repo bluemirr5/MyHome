@@ -12,16 +12,13 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li>
-                    <a ng-click="changePage('/')">Home</a>
-                </li>
-                <li class="active">
+                <li ng-class="{active:curPage == '/remotejob'}">
                     <a ng-click="changePage('/remotejob')">Remote Job</a>
                 </li>
-                <li>
+                <li ng-class="{active:curPage == '/remotemeeting'}">
                     <a ng-click="changePage('/remotemeeting')">Remote Meeting</a>
                 </li>
-                <li>
+                <li ng-class="{active:curPage == '/contact'}">
                     <a ng-click="changePage('/contact')">Contact</a>
                 </li>
             </ul>

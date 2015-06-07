@@ -9,15 +9,17 @@ angular.module('common.directives', []).
             restrict : "AE",
             transclude: true,
             scope: {
-                totalCount: '=',
-                currentPage: '=',
-                pageSize: '@',
-                pagingColSize: '@',
-                selectedCallBack: '&'
+                //totalCount: '=',
+                //currentPage: '=',
+                //pageSize: '@',
+                //pagingColSize: '@',
+                //selectedCallBack: '&'
             },
             link: function (scope, el, attr) {
+                scope.curPage = $location.path();
                 scope.changePage = function(pageId) {
                     $location.url(pageId);
+                    scope.curPage = $location.path();
                 };
             }
         };
