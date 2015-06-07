@@ -36,7 +36,7 @@
 	angular.module('remoteJobApp', [])
 	.controller('RemoteJobController', function($scope, $http) {
 		$scope.getList = function() {
-			$http.get('/getRemoteJobInfo').
+			$http.get('/api/getRemoteJobInfo').
 			success(function(data, status, headers, config) {
 				$scope.list = data.ResultContent
 				console.log(data.ResultContent);
@@ -46,7 +46,7 @@
 		};
 		
 		$scope.startBatch = function(){
-			$http.get('/batchNow').
+			$http.get('/api/batchNow').
 			success(function(data, status, headers, config) {
 				if(data.ResultCode == 200) {
 					alert("bach complete");
@@ -98,16 +98,16 @@
 					<tr>
 						<th class="text-center">회사</th>
 						<th class="text-center">업데이트 일</th>
-						<th class="text-center">구인페이지</th>
 						<th class="text-center">등록일</th>
+						<th class="text-center">링크</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr ng-repeat="job in list">
 						<td ng-bind="job.Company"></td>
 						<td ng-bind="job.UpdateDate"></td>
-						<td><a href="{{job.Url}}" target="_blank">[연결하기]</a></td>
-						<td ng-bind="job.Timestamp"></td>
+						<td ng-bind="job.Timestamp.substring(0, 16)"></td>
+						<td><a href="{{job.Url}}" target="_blank">[Link]</a></td>
 					</tr>
 				</tbody>
 			</table>

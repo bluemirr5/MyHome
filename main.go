@@ -26,8 +26,8 @@ func main() {
 	repository = NewRemoteJobRepository()
 	repository.Open()
 	defer repository.Close()
-	http.HandleFunc("/getRemoteJobInfo", getRemoteJobInfo)
-	http.HandleFunc("/batchNow", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/getRemoteJobInfo", getRemoteJobInfo)
+	http.HandleFunc("/api/batchNow", func(w http.ResponseWriter, r *http.Request) {
 		parser.TotalGet()
 		apiResult := new(APIResult)
 		apiResult.ResultCode = 200
