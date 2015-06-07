@@ -17,12 +17,12 @@ func NewRemoteJobRepository() *RemoteJobRepository {
 }
 
 func (rjr *RemoteJobRepository) Open() {
-	session, err := mgo.Dial("mongodb://bluemirr.synology.me:8003/remote_job_info")
+	session, err := mgo.Dial("mongodb://bluemirr.synology.me:8003/myHome")
 	if err != nil {
 		panic("mongodb not connected")
 	}
 	rjr.session = session
-	rjr.Db = session.DB("remote_job_info")
+	rjr.Db = session.DB("myHome")
 	rjr.Collection = rjr.Db.C("remotejobinfo")
 }
 
@@ -41,7 +41,7 @@ func (rjr *RemoteJobRepository) Close() {
 
 func (rjr *RemoteJobRepository) FindAll() []RemoteJobModel {
 	var result []RemoteJobModel
-	rjr.Collection.Find(nil).Sort("-updateDate").All(&result)
+	rjr.Collection.Find(nil).Sort("-updatedate").All(&result)
 	return result
 }
 
