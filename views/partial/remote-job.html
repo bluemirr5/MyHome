@@ -11,6 +11,7 @@
                 <th class="text-center">회사</th>
                 <th class="text-center">업데이트 일</th>
                 <th class="text-center">등록일</th>
+				<th class="text-center">업데이트수</th>
                 <th class="text-center">링크</th>
             </tr>
             </thead>
@@ -19,6 +20,7 @@
                 <td ng-bind="job.Company"></td>
                 <td ng-bind="job.UpdateDate"></td>
                 <td ng-bind="job.Timestamp.substring(0, 16)"></td>
+				<td ng-bind="job.UpdateHistory.length" title="{{job.UpdateHistory}}"></td>
                 <td><a href="{{job.Url}}" target="_blank">[Link]</a></td>
             </tr>
             </tbody>
