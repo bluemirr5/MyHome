@@ -73,48 +73,67 @@ func (r rocketJobHtmlParser) searchList() []*html.Node {
 }
 
 func (r rocketJobHtmlParser) searchDetailKeyword(articles []*html.Node) {
+	// search article & make job-item for save
+	updateTimeStamp := time.Now()
+	var remoteJobModelList []*RemoteJobModel
+	//ch := make(chan RemoteJobModel, len(articles))
+	for _, article := range articles {
+		remoteJobModel := r.makeJobItem(article, updateTimeStamp)
+		if remoteJobModel != nil {
+			remoteJobModelList = append(remoteJobModelList, remoteJobModel)
+		}
+	}
+
+	// db save
 	remoteJobRepository := NewRemoteJobRepository()
 	remoteJobRepository.Open()
 	defer remoteJobRepository.Close()
-	cnt := 0
-	updateTimeStamp := time.Now()
-	for _, article := range articles {
-		company := scrape.Text(article.FirstChild.FirstChild.NextSibling.FirstChild.NextSibling)
-		var updateStr string
-		if article.NextSibling != nil &&
+	for _, remoteJobModel := range remoteJobModelList {
+		remoteJobRepository.Save(remoteJobModel.Url, remoteJobModel.Company, remoteJobModel.UpdateDate, updateTimeStamp)
+	}
+
+	endTime := time.Now()
+	fmt.Println("time spend : " + strconv.FormatInt(endTime.Unix()-updateTimeStamp.Unix(), 10))
+}
+
+func (r rocketJobHtmlParser) makeJobItem(article *html.Node, updateTimeStamp time.Time) *RemoteJobModel {
+	company := scrape.Text(article.FirstChild.FirstChild.NextSibling.FirstChild.NextSibling)
+	var updateStr string
+	if article.NextSibling != nil &&
 		article.NextSibling.NextSibling != nil &&
 		article.NextSibling.NextSibling.FirstChild != nil &&
 		article.NextSibling.NextSibling.FirstChild.FirstChild != nil {
-			updateStr = scrape.Text(article.NextSibling.NextSibling.FirstChild.FirstChild)
-		}
-		
-		dtailLink := scrape.Attr(article, "href")
-		companyResp, err := http.Get(ROCKET_HOST + dtailLink)
-		if err != nil {
-			continue
-		}
-		companyRoot, err := html.Parse(companyResp.Body)
-		if err != nil {
-			continue
-		}
-		detailText := scrape.Text(companyRoot)
-		isKeyword := false
-		for _, keyword := range r.Keywords {
-			isKeyword = strings.Contains(detailText, keyword)
-		}
-		if isKeyword {
-			url := ROCKET_HOST + dtailLink
-			updateSlice := strings.Fields(updateStr)
-			var updateDate string
-			if len(updateSlice) >= 2 {
-				updateDate = updateSlice[1]
-				updateDate = strings.TrimSpace(updateDate)
-			}
-			
-			fmt.Println(strconv.Itoa(cnt) + ":" + updateDate + ":" + company + ":" + url)
-			remoteJobRepository.Save(url, company, updateDate, updateTimeStamp)
-			cnt++
-		}
+		updateStr = scrape.Text(article.NextSibling.NextSibling.FirstChild.FirstChild)
 	}
-	fmt.Println("=============================");
+
+	dtailLink := scrape.Attr(article, "href")
+	companyResp, err := http.Get(ROCKET_HOST + dtailLink)
+	if err != nil {
+		return nil
+	}
+	companyRoot, err := html.Parse(companyResp.Body)
+	if err != nil {
+		return nil
+	}
+	detailText := scrape.Text(companyRoot)
+	isKeyword := false
+	for _, keyword := range r.Keywords {
+		isKeyword = strings.Contains(detailText, keyword)
+	}
+	if isKeyword {
+		url := ROCKET_HOST + dtailLink
+		updateSlice := strings.Fields(updateStr)
+		var updateDate string
+		if len(updateSlice) >= 2 {
+			updateDate = updateSlice[1]
+			updateDate = strings.TrimSpace(updateDate)
+		}
+		remoteJobModel := new(RemoteJobModel)
+		remoteJobModel.Url = url
+		remoteJobModel.Company = company
+		remoteJobModel.UpdateDate = updateDate
+		fmt.Println(remoteJobModel.UpdateDate + ":" + remoteJobModel.Company + ":" + remoteJobModel.Url)
+		return remoteJobModel
+	}
+	return nil
 }
