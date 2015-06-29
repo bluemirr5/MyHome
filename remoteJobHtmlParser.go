@@ -76,12 +76,29 @@ func (r rocketJobHtmlParser) searchDetailKeyword(articles []*html.Node) {
 	// search article & make job-item for save
 	updateTimeStamp := time.Now()
 	var remoteJobModelList []*RemoteJobModel
-	//ch := make(chan RemoteJobModel, len(articles))
-	for _, article := range articles {
-		remoteJobModel := r.makeJobItem(article, updateTimeStamp)
-		if remoteJobModel != nil {
-			remoteJobModelList = append(remoteJobModelList, remoteJobModel)
+	
+	ch := make(chan *RemoteJobModel, len(articles))
+	for index, article := range articles {
+		go func(article *html.Node){
+			remoteJobModel := r.makeJobItem(article, updateTimeStamp)
+			if remoteJobModel != nil {
+				ch <- remoteJobModel
+			} else {
+				ch <- nil
+			}
+		}(article)
+		if (index % 10) == 0 {
+			time.Sleep(1000 * time.Millisecond)
 		}
+	}
+	
+	for range articles {
+		remoteJobModelTemp := <- ch
+		if remoteJobModelTemp != nil {
+			remoteJobModelList = append(remoteJobModelList, remoteJobModelTemp)
+		} else {
+		}
+		
 	}
 
 	// db save
@@ -98,21 +115,25 @@ func (r rocketJobHtmlParser) searchDetailKeyword(articles []*html.Node) {
 
 func (r rocketJobHtmlParser) makeJobItem(article *html.Node, updateTimeStamp time.Time) *RemoteJobModel {
 	company := scrape.Text(article.FirstChild.FirstChild.NextSibling.FirstChild.NextSibling)
+	
 	var updateStr string
 	if article.NextSibling != nil &&
 		article.NextSibling.NextSibling != nil &&
 		article.NextSibling.NextSibling.FirstChild != nil &&
 		article.NextSibling.NextSibling.FirstChild.FirstChild != nil {
 		updateStr = scrape.Text(article.NextSibling.NextSibling.FirstChild.FirstChild)
+		
 	}
 
 	dtailLink := scrape.Attr(article, "href")
 	companyResp, err := http.Get(ROCKET_HOST + dtailLink)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil
 	}
 	companyRoot, err := html.Parse(companyResp.Body)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil
 	}
 	detailText := scrape.Text(companyRoot)
