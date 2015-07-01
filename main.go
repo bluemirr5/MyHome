@@ -34,8 +34,8 @@ func main() {
 		returnVal, _ := json.Marshal(apiResult)
 		w.Write(returnVal)
 	})
-	http.HandleFunc("/",func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/views/", http.StatusFound)    
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/views/", http.StatusFound)
 	})
 	http.Handle("/views/", http.StripPrefix("/views/", http.FileServer(http.Dir("./views/"))))
 	http.ListenAndServe(":4001", nil)

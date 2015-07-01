@@ -76,10 +76,10 @@ func (r rocketJobHtmlParser) searchDetailKeyword(articles []*html.Node) {
 	// search article & make job-item for save
 	updateTimeStamp := time.Now()
 	var remoteJobModelList []*RemoteJobModel
-	
+
 	ch := make(chan *RemoteJobModel, len(articles))
 	for index, article := range articles {
-		go func(article *html.Node){
+		go func(article *html.Node) {
 			remoteJobModel := r.makeJobItem(article, updateTimeStamp)
 			if remoteJobModel != nil {
 				ch <- remoteJobModel
@@ -91,14 +91,14 @@ func (r rocketJobHtmlParser) searchDetailKeyword(articles []*html.Node) {
 			time.Sleep(1000 * time.Millisecond)
 		}
 	}
-	
+
 	for range articles {
-		remoteJobModelTemp := <- ch
+		remoteJobModelTemp := <-ch
 		if remoteJobModelTemp != nil {
 			remoteJobModelList = append(remoteJobModelList, remoteJobModelTemp)
 		} else {
 		}
-		
+
 	}
 
 	// db save
@@ -115,14 +115,14 @@ func (r rocketJobHtmlParser) searchDetailKeyword(articles []*html.Node) {
 
 func (r rocketJobHtmlParser) makeJobItem(article *html.Node, updateTimeStamp time.Time) *RemoteJobModel {
 	company := scrape.Text(article.FirstChild.FirstChild.NextSibling.FirstChild.NextSibling)
-	
+
 	var updateStr string
 	if article.NextSibling != nil &&
 		article.NextSibling.NextSibling != nil &&
 		article.NextSibling.NextSibling.FirstChild != nil &&
 		article.NextSibling.NextSibling.FirstChild.FirstChild != nil {
 		updateStr = scrape.Text(article.NextSibling.NextSibling.FirstChild.FirstChild)
-		
+
 	}
 
 	dtailLink := scrape.Attr(article, "href")
