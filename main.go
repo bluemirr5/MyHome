@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+	"runtime"
+	"fmt"
 )
 
 const INTERVAL_PERIOD time.Duration = 3 * time.Hour
@@ -12,6 +14,9 @@ const INTERVAL_PERIOD time.Duration = 3 * time.Hour
 var repository *RemoteJobRepository
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	fmt.Println(runtime.GOMAXPROCS(0))
+
 	parser := NewRocketJobHtmlParser()
 
 	scheduler := NewScheduler(INTERVAL_PERIOD)

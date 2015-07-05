@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"sync"
 
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
@@ -78,7 +79,9 @@ func (r rocketJobHtmlParser) searchDetailKeyword(articles []*html.Node) {
 	var remoteJobModelList []*RemoteJobModel
 
 	ch := make(chan *RemoteJobModel, len(articles))
+	wg := new(sync.WaitGroup)
 	for index, article := range articles {
+		wg.Add(1)
 		go func(article *html.Node) {
 			remoteJobModel := r.makeJobItem(article, updateTimeStamp)
 			if remoteJobModel != nil {
@@ -86,20 +89,23 @@ func (r rocketJobHtmlParser) searchDetailKeyword(articles []*html.Node) {
 			} else {
 				ch <- nil
 			}
+			wg.Done()
 		}(article)
-		if (index % 10) == 0 {
+		if (index % 10) == 0 { // 대상 웹서버의 부하로 503 error 피하기
 			time.Sleep(1000 * time.Millisecond)
 		}
 	}
+	wg.Wait()
 
+	count := 0
 	for range articles {
 		remoteJobModelTemp := <-ch
 		if remoteJobModelTemp != nil {
 			remoteJobModelList = append(remoteJobModelList, remoteJobModelTemp)
-		} else {
+			count++
 		}
-
 	}
+	fmt.Println(count)
 
 	// db save
 	remoteJobRepository := NewRemoteJobRepository()
